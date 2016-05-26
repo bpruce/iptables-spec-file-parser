@@ -11,7 +11,7 @@ do
    fw_name=$(basename "${fields[*]: -1}")
    
    #ftp server testing should happen first, then multi will reset if FTP has IP address src
-   if [[ $line == *"ftp"*]] ; then
+   if [[ $line == *"ftp"* ]] ; then
       srcip="any"
       ports=${fields[5]}
    fi
