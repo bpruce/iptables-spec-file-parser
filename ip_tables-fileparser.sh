@@ -1,16 +1,22 @@
 #/bin/bash
-declare result
 now=$(date +"%m_%d_%Y")
-cat ../edgeTable_$now.csv | while read -r line 
+touch ../edgeParsed_$now.csv
+cat ../edgeTable_$now.csv | while read -r line
 do
+   fields=($line)
+   #fixed
+   prot=${fields[3]}
+   srcip=${fields[5]}
+   ports=${fields[7]}
+   fw_name=$(basename "${fields[*]: -1}")
+   
+   #ftp server testing should happen first, then multi will reset if FTP has IP address src
+   if [[ $line == *"ftp"*]] ; then
+      srcip="any"
+      ports=${fields[5]}
+   fi
+   #multiport line testing - can have no source, or source, so needs to test for this
    if [[ $line == *"multi"* ]] ; then
-      fields=($line)
-      
-      #protocol is always fixed @3
-      prot=${fields[3]}
-      #filename is always last entry
-      fw_name=$(basename "${fields[*]: -1}")
-      
       #test for any source and multi ports
       if [ "${fields[5]}" = "multiport" ] ; then
         srcip="any"
@@ -19,13 +25,10 @@ do
         srcip=${fields[5]}
         ports=${fields[9]}
       fi
-
-      echo $prot $srcip $ports $fw_name >> ../test.csv
-      # empty the $result array
-      unset result 
-   else
-      xx=$( echo $line | cut -d' ' -f4,6,8,15 ) 
-      echo $xx >> ../test.csv
    fi
+   
+   echo "\"$prot $srcip $ports $fw_name\"" >> ../edgeParsed_$now.csv
+   unset prot srcip ports fw_name
 done
+
 exit
