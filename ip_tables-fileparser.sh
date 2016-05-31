@@ -1,6 +1,6 @@
 #/bin/bash
 now=$(date +"%m_%d_%Y")
-touch ../edgeParsed_$now.csv
+touch ../tmpParse_$now.csv ../fw_edges_$now.csv
 cat ../edgeTable_$now.csv | while read -r line
 do
    fields=($line)
@@ -28,8 +28,12 @@ do
       fi
    fi
    
-   echo "\"$prot $srcip $ports $fw_name\"" >> ../edgeParsed_$now.csv
+   echo "\"$prot $srcip $ports $fw_name\"" >> ../tmpParse_$now.csv
    unset prot srcip ports fw_name
 done
+
+#sort files 1) Node Name 2) Port 3) IP address
+sort -k 4,4 -k 3,3n -k 2,2n ../tmpParse_$now.csv > ../fw_edges_$now.csv
+
 
 exit
